@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# oz_assignment
-# oz_assignment
-=======
-# OZ Coding School AI BootCamp
-## Git & GitHub Example
-- Dates: 26.10.06 ~ 26.10.08
->>>>>>> d99867296fb9fa12b99e44b1249b18e1baab6d8b
+### 📅 2026-10-12 HTML & CSS 학습 일지
+
+### 📝 오늘 배운 내용 (Day 1)
+HTML 기본 구조 및 주요 태그 학습과 이력서 페이지 구조화 실습
