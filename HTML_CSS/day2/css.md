@@ -9,9 +9,9 @@ CSS (Cascading Style Sheets) : HTML로 작성된 웹 문서의 디자인, 레이
 
 1) Internal CSS (내부 스타일 시트)
 
-설명: HTML 문서 내부의 `<head>` 태그 안에 `<style>` 태그를 작성하여 스타일을 적용하는 방식입니다.
-특징: 해당 HTML 문서 전체에 일괄 적용되며, 단일 페이지 웹사이트나 테스트 작업 시 유용합니다.
-예시: 
+  설명: HTML 문서 내부의 `<head>` 태그 안에 `<style>` 태그를 작성하여 스타일을 적용하는 방식입니다.
+  특징: 해당 HTML 문서 전체에 일괄 적용되며, 단일 페이지 웹사이트나 테스트 작업 시 유용합니다.
+  예시: 
 ```html
 
 <head>
@@ -204,6 +204,6 @@ g. box-sizing
 
 설명 : 요소의 전체 크기(width, height) 계산 방식을 결정하는 속성
 주요 값 : 
-    > 1) content-box : 지정한 `width`가 content 영역만의 크기가 되며, `padding`과 `border`를 더할수록 전체 요소 박스 크기 커짐
-
+    
+    1) content-box : 지정한 `width`가 content 영역만의 크기가 되며, `padding`과 `border`를 더할수록 전체 요소 박스 크기 커짐
     2) border-box : 지정한 `width` 안에 `padding`과 `border`의 두께까지 포함되어 레이아웃 계산이 훨씬 용이
