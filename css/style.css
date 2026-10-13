@@ -1,0 +1,25 @@
+#contents {
+            text-align: center;
+}
+header {
+    font-family:font-family: "IBM Plex Sans KR", sans-serif;
+    font-size: x-large; 
+    font-weight: bold;
+    margin: 20px;
+}
+#github {
+    font-size: small;
+    color: gray;
+    text-decoration: none;
+}
+#github:hover {
+    color: orange;
+    text-decoration: underline;
+}
+main {
+    padding: 50px;
+}        
+footer {
+    margin-top: 50px;
+    font-size: x-small;
+}

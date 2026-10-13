@@ -1,0 +1,2 @@
+print("LEFT")
+print("RIGHT")

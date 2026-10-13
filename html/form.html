@@ -1,0 +1,24 @@
+<html>
+<head>
+    <meta name="viewport" content="">
+    <title>Document</title>
+</head>
+<body>
+    <!-- GET (안적으면 GET) -->
+    <form action="https://google.com/search">
+        <input type="search" name="q">
+        <button>검색</button>
+    </form>
+    <hr>
+    <!-- POST -->
+    <form action="https://httpbin.org/post" method="post">
+        <label for="newEmail">이메일</label>
+        <input id="NewEmail" type="email" name="newEmail" placehoder="이메일">
+        <br>
+        <label for="newPassword"></label>
+        <input id="NewPassword" type="email" name="newEmail" placeholder="이메일">
+        <input type="password" name="newPassword" placeholder="비밀번호">
+        <button>회원가입</button>
+    </form>
+</body>
+</html>
