@@ -1,0 +1,291 @@
+/* 화면 전체(body) 및 메인 컨텐츠 영역 설정 */
+body {
+  margin: 0;
+  padding-left: 70px; /* 왼쪽에 70px 바(Strip) 공간을 확보하여 본문 내용이 겹치지 않게 함 */
+}
+
+.sidebar {
+    display: flex;
+    background-color: #fcd1d1;
+    color: white;
+    width: 200px;
+    height: 100vh;
+    position: fixed; /* 화면 스크롤 시에도 좌측에 고정 */
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    padding-top: 40px;
+}
+
+.sidebar-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 60px; /* 항상 보이는 고정 너비 */
+    height: 100vh;
+    background-color: #ffdada; /* 참고 이미지와 동일한 분홍색 배경 */
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    transition: width 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 평소에 보이는 햄버거 버튼 스타일 */
+.hamburger-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 15px;
+  color: #333333;
+  cursor: pointer;
+  z-index: 1001;
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.3s ease;
+}
+
+/* 분홍색 사이드바 메뉴 (기본 상태: 화면 왼쪽 밖으로 숨김) */
+.sidebar-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200px; /* 사이드바 너비 */
+  height: 100%;
+  background-color: #ffdada; /* 이미지와 동일한 분홍색 배경 */
+  padding: 80px 30px 30px 30px;
+  box-sizing: border-box;
+
+  /* 핵심: 화면 왼쪽 밖으로 100% 밀어서 숨기기 */
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); /* 부드럽게 쑉 나오는 애니메이션 */
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+}
+
+/* 사이드바 내 텍스트 및 링크 스타일 */
+.sidebar-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+}
+
+.sidebar-menu li {
+  margin-bottom: 30px;
+}
+
+.sidebar-menu a {
+  color: #ffffff; /* 흰색 글자 */
+  font-size: 20px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  display: block;
+}
+
+.sidebar-menu a:hover {
+  color: #ff6b6b; /* 마우스 올렸을 때 강조 색상 */
+}
+
+/* 컨테이너 영역(햄버거 버튼 or 메뉴)에 마우스를 올리면 사이드바 등장 */
+.sidebar-container:hover .sidebar-menu {
+  transform: translateX(0); /* 제자리로 쑉 등장 */
+}
+
+/* 사이드바가 열렸을 때 햄버거 버튼 투명화 */
+.sidebar-container:hover .hamburger-btn {
+  opacity: 0;
+}
+
+/* 이름 글자 크기 줄이기 (기존 2.5rem -> 1.8rem~2.0rem) */
+.header-info .name {
+    font-size: 1.8rem; /* 숫자를 더 줄이면 더 작아집니다 (예: 1.6rem) */
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+}
+
+/* 연락처/이메일/깃허브 글자 크기 줄이기 (기존 0.95rem -> 0.85rem) */
+.contact-list {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* 글자가 줄어든 만큼 간격도 살짝 줄여주면 더 깔끔합니다 */
+    flex-wrap: wrap;
+    color: #555555;
+    font-size: 0.85rem; /* 원하는 크기로 조절 (예: 0.8rem, 13px, 14px) */
+}
+
+/* 2. 상단 레이아웃: 양끝 정렬 */
+.header-container {
+    display: flex;
+    justify-content: space-between; /* 양 끝으로 배치 */
+    align-items: center;            /* 세로 중앙 정렬 */
+    padding-bottom: 20px;
+    padding-left: 10px;
+}
+
+/* github 수정 */
+.github-link {
+  color: inherit; /* 상위 텍스트 색상(검정색) 상속 */
+  text-decoration: none; /* 밑줄 제거 */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px; /* 아이콘과 텍스트 사이 간격 */
+}
+
+/* Hover 상태 (마우스를 올렸을 때 파란 글씨 + 파란 밑줄 + 아이콘 표시) */
+.github-link:hover {
+  color: blueviolet;
+  text-decoration: underline; /* 밑줄 */
+}
+
+/* 3. 사진 틀 (동그라미 만들기) */
+.profile-img-box {
+    width: 120px;            /* 원의 가로 크기 */
+    height: 120px;           /* 원의 세로 크기 (width와 동일하게 설정) */
+    border-radius: 50%;      /* 테두리를 완전히 동그랗게 설정 */
+    overflow: hidden;        /* 넘치는 이미지 영역 자르기 */
+    flex-shrink: 0;          /* 화면이 줄어들어도 사진 크기 고정 */
+}
+
+/* 4. 이미지 자체 스타일 */
+.profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;       /* 이미지가 찌그러지지 않고 비율에 맞게 채워지도록 함 */
+}
+/* 섹션 공통 간격 */
+.section {
+    margin-bottom: 40px;
+}
+
+/* 1. 왼쪽에 검은 막대가 있는 제목 스타일 */
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #222222;
+    border-left: 4px solid #222222; /* 왼쪽 두꺼운 직선 세로선 */
+    padding-left: 12px;             /* 세로선과 글자 사이 간격 */
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+/* 자기소개 본문 텍스트 */
+.intro-desc {
+    color: #555555;
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
+/* 2. 스킬 그룹 스타일 */
+.skill-group {
+    margin-bottom: 20px;
+}
+
+/* 소제목 (LANGUAGE, FRAMEWORK 등) */
+.skill-category {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #888888;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+/* 태그들을 가로로 늘어놓기 */
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px; /* 태그끼리의 간격 */
+}
+
+/* 3. 동그란 태그(배지) 스타일 */
+.tag {
+    background-color: #f1f3f5; /* 밝은 회색 배경 */
+    color: #334155;            /* 진한 텍스트 색상 */
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 8px 16px;         /* 태그 안쪽 여백 */
+    border-radius: 20px;       /* 알약처럼 동그랗게 둥근 모서리 */
+    display: inline-block;
+}
+
+/* 섹션 타이틀 (왼쪽 검은 막대) */
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    border-left: 4px solid #1a1a1a;
+    padding-left: 12px;
+    margin-bottom: 24px;
+    line-height: 1.2;
+}
+
+/* 경력 아이템 컨테이너 */
+.exp-item {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0; /* 경력 아이템 간 은은한 구분선 */
+}
+
+.exp-item:last-child {
+    border-bottom: none; /* 마지막 아이템 구분선 제거 */
+}
+
+/* 회사명 & 기간 (양끝 정렬) */
+.exp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.company-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #222222;
+}
+
+.period {
+    font-size: 0.9rem;
+    color: #888888;
+    font-weight: 500;
+}
+
+/* 직무 및 근무 기간 (회색 서브 텍스트) */
+.position-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    color: #666666;
+}
+
+.position {
+    font-weight: 600;
+}
+
+.divider-line {
+    color: #dddddd;
+}
+
+.tenure {
+    color: #777777;
+}
+.inline-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.inline-date {
+    width: 160px;          /* 날짜 영역의 가로 폭 고정 */
+    flex-shrink: 0;        /* 간격 유지 */
+    color: #888888;        /* 연한 회색 */
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+.inline-content {
+    color: #222222;        /* 진한 검은색 */
+    font-size: 1rem;
+    font-weight: 600;      /* 두껍게 */
+}

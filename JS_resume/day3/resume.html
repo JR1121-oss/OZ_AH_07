@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume</title>
+    <!-- 외부 CSS(External CSS)-->
+    <!-- Fontawesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+    
+    <!-- resume_style.css -->
+    <link rel="stylesheet" href="./resume_style.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR&display=swap" rel="stylesheet">
+</head>
+<body>
+    <aside class="sidebar-container">
+         <!-- 마우스 올리기 전 보이는 햄버거 버튼 -->
+        <div class="hamburger-btn">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+    <!-- 슬라이드로 나타날 분홍색 사이드바 메뉴 -->
+        <nav class="sidebar-menu">
+            <ul>
+                <li><a href="#resume">이력서</a></li>
+                <li><a href="#portfolio">포트폴리오</a></li>
+                <li><a href="#pdf-download">PDF 내려받기</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- 상단 헤더 영역 -->
+    <header class="header-container">
+        <!-- 왼쪽: 이름 및 연락처 -->
+        <div class="header-info">
+            <h2 class="name">Jeong-Rin Kim.</h2>
+            <br>
+            <div class="contact-list">
+                <span class="contact-item">
+                    <i class="fa-solid fa-mobile-screen-button"></i> 010-1234-5678
+                </span>    
+                <span class="contact-item">
+                    <i class="fa-regular fa-envelope"></i> wjdfls1121@gmail.com
+                </span>  
+                <a href="https://github.com/JR1121-oss?tab=repositories" class="contact-item github-link" target="_blank">
+                    <i class="fa-brands fa-github"></i> JR's Github
+                </a>
+                <p>
+                    ✌🏻 데이터 분석가를 꿈꾸는 김정린 입니다.
+                </p>
+            </div>
+        </div>
+
+        <!-- 오른쪽: 증명 사진 -->
+        <div class="profile-img-box">
+            <img src="증명사진.jpeg" alt="프로필 사진" class="profile-img">
+        </div>
+    </header>
+<hr>
+    <!-- Introduce 섹션 -->
+    <section class="section">
+        <h3 class="section-title">Introduce</h3>
+        <p class="intro-desc">
+            <ol type="1">
+                <li>이름 : 김정린</li>
+                <li>나이 : 30살</li>
+                <li>출생년도 : 1997년</li>
+                <li>성별 : 여자</li>
+                <li>MBTI : ISTJ</li>
+            </ol>
+        </p>
+    </section>
+    <section class="section">
+        <h3 class="section-title">Skills</h3>
+        <div class="skill-group">
+            <h4 class="skill-category">- Language -</h4>
+            <div class="tag-list">
+                <span class="tag">Python</span>
+                <span class="tag">HTML/CSS</span>
+                <span class="tag">SQL</span>
+            </div>
+        </div>    
+    </section>
+    <section class="section">
+    <h2 class="section-title">Experience</h2>
+
+    <!-- 대학병원 치과 -->
+    <div class="exp-item">
+        <div class="exp-header">
+            <h3 class="company-name">대학병원 치과</h3>
+            <span class="period">2023.05 ~ 2026.06</span>
+        </div>
+        <div class="position-info">
+            <span class="position">치과위생사</span>
+            <span class="divider-line">|</span>
+            <span class="tenure">3년 1개월</span>
+        </div>
+    <!-- 세부 업무/프로젝트 내용 추가 시작 -->
+        <div class="exp-details">
+            <div class="project-item">
+                <div class="project-header">    
+                    <h4 class="project-title">1. 보철과</h4>
+                        <span class="period">2025.07 ~ 2026.06</span>
+                <ul class="task-list">
+                    <li>진료 준비 및 어시스트</li>
+                    <li>예약 환자 기공물 관리 및 치료 후 기공물 모델 정리</li>
+                    <li>진료 기구 소독 및 병원 위생 상태 관리</li>
+                    <li>전자차트(EMR) 기반 환자 진료 기록 및 예약 관리</li>
+                    <li>대외협력팀 업무1 - 진료의뢰서 및 요양급여의뢰서 치과 내 각 과로 전달</li>
+                    <li>대외협력팀 업무2 - 매월 각 과별 의뢰서 수 엑셀 파일에 정리</li>
+                </ul>
+                </div>
+                <div class="project-header">
+                    <h4 class="project-title">2. 치주과(스케일링실)</h4>
+                    <span class="period">2024.10 ~ 2025.06</span>
+                </div>
+                <ul class="task-list">
+                    <li>스케일링 및 구강위생 교육 담당</li>
+                    <li>전자차트(EMR) 기반 환자 진료 기록 및 예약 관리</li>
+                    <li>진료 기구 소독 및 병원 위생 상태 관리</li>
+                    <li>일,월마다 스케일링 보험 청구율 체크</li>
+                    <li>직원교육팀 업무1 - 팀 회의록 작성</li>
+                    <li>직원교육팀 업무2 - 직원 대상 감염관리 등 교육 계획</li>
+                </ul>
+                <div class="project-header">
+                    <h4 class="project-title">3. 보존과</h4>
+                    <span class="period">2023.05 ~ 2024.09</span>
+                </div>
+                <ul class="task-list">
+                    <li>진료 준비 및 어시스트</li>
+                    <li>진료 기구 소독 및 병원 위생 상태 관리</li>
+                    <li>전자차트(EMR) 기반 환자 진료 기록 및 예약 관리</li>
+                    <li>학생교육팀 업무1 - 실습생 교육 및 실습일지 확인</li>
+                    <li>학생교육팀 업무2 - 실습생 리플렛 검사 & 시험 감독</li>
+                    <li>학생교육팀 업무3 - 각 학생별 시험 점수 엑셀 파일에 정리 & 설문조사 이메일로 전송 </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 치과병원 -->
+    <div class="exp-item">
+        <div class="exp-header">
+            <h3 class="company-name">치과병원</h3>
+            <span class="period">2020.02 ~ 2023.03</span>
+        </div>
+        <div class="position-info">
+            <span class="position">치과위생사</span>
+            <span class="divider-line">|</span>
+            <span class="tenure">3년 1개월</span>
+        </div>
+        <!-- 세부 업무/프로젝트 내용 추가 시작 -->
+        <div class="exp-details">
+            <div class="project-item">
+                <div class="project-header">    
+                    <h4 class="project-title">1. 팀 구조 변경</h4>
+                        <span class="period">2022.02 ~ 2023.03</span>
+                <ul class="task-list">
+                    <li>통합 2팀 소속으로 변경</li>
+                    <li>팀별 소속 의사의 예약 환자 챠트 리뷰</li>
+                    <li>예약 환자 기공물 관리</li>
+                </ul>
+
+                <div class="project-header">    
+                    <h4 class="project-title">2. 팀 변경 전 통합과</h4>
+                        <span class="period">2020.02 ~ 2022.01</span>
+                <ul class="task-list">
+                    <li>임플란트 수술방 담당으로 3개월 근무</li>
+                    <li>스케일러 갯수 파악 및 신경치료 시 사용하는 파일(file) 정리</li>
+                </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="section">
+        <h2 class="section-title">Education</h2>
+        <div class="inline-item">
+            <span class="inline-date">2016.03 ~ 2020.02</span>
+            <span class="inline-content"> 을지대학교 (치위생학과 전공)</span>
+        </div>
+    </section>
+    <br>
+    <section>
+        <h2 class="section-title">Award</h2>
+        <div class="inline-item">            
+            <span class="inline-date">2019.05</span>
+            <span class="inline-content">(교내 논문 활동) 공로상 수상</span>
+        </div>
+    </section>
+    <br>
+    <section>
+        <h2 class="section-title">Certifications</h2>
+        <div class="inline-item">            
+            <span class="inline-date">2023.05</span>
+            <span class="inline-content">치과보험청구사 2급</span>
+        </div>
+        <div class="inline-item">            
+            <span class="inline-date">2021.11</span>
+            <span class="inline-content">한국사능력검정시험 1급</span>
+        </div>
+        <div class="inline-item">
+            <span class="inline-date">2020.02</span>
+            <span class="inline-content">컴퓨터활용능력 2급</span>
+        </div>
+    
+    </section>
+</body>
+</html>
