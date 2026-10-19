@@ -1,2 +1,0 @@
-print("LEFT")
-print("RIGHT")
