@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoPulse - 실시간 암호화폐 가격 변동 추적기</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="binance.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        lightBg: '#f8fafc',
+                        cardBg: '#ffffff',
+                        cardBorder: '#e2e8f0',
+                        cryptoUp: '#16a34a',
+                        cryptoDown: '#dc2626',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-lightBg text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-cyan-500 selection:text-white">
+<!-- bg-lightBg: 밝은 회색 계열의 배경 / text-slate-800: 기본 글자색 / font-sans: 산세리프 계열 글꼴 / min-h-screen: 최소 높이를 화면 높이만큼 확보 / flex flex-col: 요소를 세로 방향으로 배치 -->
+    
+    <!-- Header Section : 상단 로고와 연결 상태, 일시정지 버튼 -->
+    <header class="glass-panel sticky top-0 z-30 border-b border-slate-200 shadow-sm">
+        <!-- 스크롤해도 상단에 붙어 있도록 sticky top-0 사용 / z-30 은 다른 요소와 겹칠때 표시 순서 조정 -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center shadow-md shadow-cyan-500/20">
+                    <i class="fa-solid fa-chart-line text-white text-xl font-black"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">
+                        CryptoPulse
+                    </span>
+                    <span class="hidden sm:inline-block text-xs text-slate-500 ml-2 px-2 py-0.5 rounded bg-slate-100 border border-slate-200">
+                        Binance USDT Markets
+                    </span>
+                    <span> 
+                        <button id="themeToggle" type="button">🌙 다크 모드</button>
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-4 sm:space-x-6">
+                <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200 text-xs shadow-inner">
+                    <span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 live-dot"></span>
+                    <!-- id는 특정 HTML 요소를 JavaScript에서 찾을 수 있게 해주는 고유한 이름 -->
+                    <span id="statusText" class="text-slate-600 font-medium">1초 주기 갱신 중</span>
+                </div>
+
+                <button id="togglePauseBtn" title="실시간 업데이트 일시정지/재개" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 transition-colors shadow-sm">
+                    <i class="fa-solid fa-pause text-sm" id="pauseIcon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- main : 요약 카드, 검색창, 탭, 시세 표 -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Top Market Overview Summary Cards -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="glass-panel p-4 rounded-2xl relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">USDT 총 거래대금 (24h)</p>
+                        <h3 id="statTotalVol" class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">계산 중...</h3>
+                        <!-- statTotalVol : 전체 거래대금 | 각 코인의 quoteVolume 합계 -->
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+                        <i class="fa-solid fa-coins text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">상장 USDT 페어 총합 기준</p>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">최대 상승 (24h)</p>
+                        <div class="flex items-baseline space-x-2 mt-1">
+                            <h3 id="statTopGainerSymbol" class="text-xl sm:text-2xl font-bold text-emerald-600">-</h3>
+                            <!-- statTopGainerSymbol : 최대 상승 코인 | 24시간 변동률이 가장 높은 코인 -->
+                            <span id="statTopGainerChange" class="text-sm font-semibold text-cryptoUp">0.00%</span>
+                        </div>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+                        <i class="fa-solid fa-arrow-trend-up text-lg"></i>
+                    </div>
+                </div>
+                <p id="statTopGainerPrice" class="text-xs text-slate-500 mt-2">현재가: -</p>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">최대 하락 (24h)</p>
+                        <div class="flex items-baseline space-x-2 mt-1">
+                            <h3 id="statTopLoserSymbol" class="text-xl sm:text-2xl font-bold text-rose-600">-</h3>
+                            <!-- statTopLoserSymbol : 최대 하락 코인 | 24시간 변동률이 가장 낮은 코인 -->
+                            <span id="statTopLoserChange" class="text-sm font-semibold text-cryptoDown">0.00%</span>
+                        </div>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-100">
+                        <i class="fa-solid fa-arrow-trend-down text-lg"></i>
+                    </div>
+                </div>
+                <p id="statTopLoserPrice" class="text-xs text-slate-500 mt-2">현재가: -</p>
+            </div>
+
+            <div class="glass-panel p-4 rounded-2xl relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">모니터링 암호화폐 수</p>
+                        <!-- statTotalPairs : 모니터링 코인 수 | cryptoMap 의 항목 수 -->
+                        <h3 id="statTotalPairs" class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">0</h3>
+                    </div>
+                    <div class="p-2.5 rounded-xl bg-purple-50 text-purple-600 border border-purple-100">
+                        <i class="fa-solid fa-layer-group text-lg"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-400 mt-2">바이낸스 실시간 테더 페어</p>
+            </div>
+        </section>
+
+        <!-- Controls -->
+        <div class="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
+            <div class="flex bg-slate-200/70 p-1 rounded-xl border border-slate-300/60 self-start md:self-auto">
+                <button id="tabAll" class="flex items-center space-x-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-slate-800 shadow-sm">
+                    <i class="fa-solid fa-globe text-xs text-blue-500"></i>
+                    <span>전체 보기</span>
+                    <span id="badgeAllCount" class="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-600">0</span>
+                </button>
+                <button id="tabFavorites" class="flex items-center space-x-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-800 transition-all duration-200">
+                    <i class="fa-solid fa-star text-amber-500 text-xs"></i>
+                    <span>관심 항목 보기</span>
+                    <span id="badgeFavCount" class="ml-1.5 px-2 py-0.5 text-xs rounded-full bg-white text-amber-600 border border-amber-200">0</span>
+                </button>
+            </div>
+
+            <div class="flex flex-1 max-w-md items-center space-x-3">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="searchInput" placeholder="코인명 검색 (예: BTC, ETH, SOL)..." class="w-full bg-white border border-slate-300 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 text-slate-800 text-sm rounded-xl pl-10 pr-10 py-2.5 outline-none transition-all placeholder:text-slate-400 shadow-sm">
+                    <button id="clearSearchBtn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Crypto Table Container -->
+        <div class="glass-panel rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                            <th scope="col" class="py-3.5 px-4 text-center w-12">즐겨찾기</th>
+                            <th scope="col" class="py-3.5 px-4 cursor-pointer hover:text-slate-900 transition-colors select-none" data-sort="symbol">
+                                <div class="flex items-center space-x-1">
+                                    <span>자산</span>
+                                    <i class="fa-solid fa-sort text-slate-400 text-[10px] sort-icon" id="sort-symbol"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="py-3.5 px-4 text-right cursor-pointer hover:text-slate-900 transition-colors select-none" data-sort="price">
+                                <div class="flex items-center justify-end space-x-1">
+                                    <span>현재가 (USD)</span>
+                                    <i class="fa-solid fa-sort text-slate-400 text-[10px] sort-icon" id="sort-price"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="py-3.5 px-4 text-right cursor-pointer hover:text-slate-900 transition-colors select-none" data-sort="change">
+                                <div class="flex items-center justify-end space-x-1">
+                                    <span>24시간 변동률</span>
+                                    <i class="fa-solid fa-sort-down text-cyan-600 text-[10px] sort-icon" id="sort-change"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="py-3.5 px-4 text-right cursor-pointer hover:text-slate-900 transition-colors select-none hidden md:table-cell" data-sort="high">
+                                <div class="flex items-center justify-end space-x-1">
+                                    <span>24시간 최고가</span>
+                                    <i class="fa-solid fa-sort text-slate-400 text-[10px] sort-icon" id="sort-high"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="py-3.5 px-4 text-right cursor-pointer hover:text-slate-900 transition-colors select-none hidden md:table-cell" data-sort="low">
+                                <div class="flex items-center justify-end space-x-1">
+                                    <span>24시간 최저가</span>
+                                    <i class="fa-solid fa-sort text-slate-400 text-[10px] sort-icon" id="sort-low"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="py-3.5 px-4 text-right cursor-pointer hover:text-slate-900 transition-colors select-none hidden sm:table-cell" data-sort="volume">
+                                <div class="flex items-center justify-end space-x-1">
+                                    <span>24시간 거래대금</span>
+                                    <i class="fa-solid fa-sort text-slate-400 text-[10px] sort-icon" id="sort-volume"></i>
+                                </div>
+                            </th>
+                            <th scope="col" class="py-3.5 px-4 text-center w-16">상세</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cryptoTableBody" class="divide-y divide-slate-200/80 text-sm font-medium bg-white">
+                        <tr>
+                            <td colspan="8" class="py-16 text-center text-slate-500">
+                                <div class="inline-flex flex-col items-center">
+                                    <i class="fa-solid fa-circle-notch fa-spin text-3xl text-cyan-500 mb-3"></i>
+                                    <p class="text-slate-600 font-medium">바이낸스 실시간 시세 데이터 불러오는 중...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="emptyState" class="hidden py-16 text-center bg-white">
+                <i class="fa-regular fa-folder-open text-4xl text-slate-300 mb-3"></i>
+                <p id="emptyStateMessage" class="text-slate-600 font-medium">표시할 암호화폐 항목이 없습니다.</p>
+                <p class="text-xs text-slate-400 mt-1">검색어를 변경하거나 다른 탭을 확인해 보세요.</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white w-full max-w-lg rounded-3xl p-6 border border-slate-200 shadow-2xl transform scale-95 transition-transform duration-300 relative" id="modalContent">
+            <button id="closeModalBtn" class="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition-colors">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="flex items-center space-x-4 mb-6">
+                <div id="modalIcon" class="w-12 h-12 rounded-2xl bg-cyan-50 flex items-center justify-center text-lg font-bold text-cyan-600 border border-cyan-100 shadow-sm">
+                    -
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h2 id="modalSymbol" class="text-2xl font-black text-slate-900">BTC/USDT</h2>
+                        <button id="modalFavBtn" class="text-slate-300 hover:text-amber-400 text-lg transition-colors">
+                            <i class="fa-regular fa-star" id="modalFavIcon"></i>
+                        </button>
+                    </div>
+                    <span id="modalBaseName" class="text-xs text-slate-400">Bitcoin</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 mb-6 flex justify-between items-center">
+                <div>
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">실시간 현재가</p>
+                    <p id="modalPrice" class="text-2xl font-extrabold text-slate-900 mt-0.5">$0.00</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">24h 변동률</p>
+                    <span id="modalChangeBadge" class="inline-block px-2.5 py-1 rounded-lg text-sm font-bold mt-1">
+                        0.00%
+                    </span>
+                </div>
+            </div>
+
+            <div class="space-y-2 mb-6">
+                <div class="flex justify-between text-xs text-slate-500 font-medium">
+                    <span>24h 최저가: <strong id="modalLowPrice" class="text-slate-800">$0.00</strong></span>
+                    <span>24h 최고가: <strong id="modalHighPrice" class="text-slate-800">$0.00</strong></span>
+                </div>
+                <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden relative">
+                    <div id="modalRangeBar" class="bg-gradient-to-r from-emerald-500 via-cyan-500 to-rose-500 h-full rounded-full transition-all duration-500" style="width: 50%;"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                    <p class="text-slate-400 font-medium">24시간 거래량 (Coin)</p>
+                    <p id="modalVolumeCoin" class="text-sm font-semibold text-slate-800 mt-1">-</p>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                    <p class="text-slate-400 font-medium">24시간 거래대금 (USDT)</p>
+                    <p id="modalVolumeUsdt" class="text-sm font-semibold text-slate-800 mt-1">-</p>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                    <p class="text-slate-400 font-medium">24시간 가격 변동폭</p>
+                    <p id="modalPriceChange" class="text-sm font-semibold text-slate-800 mt-1">-</p>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                    <p class="text-slate-400 font-medium">가중 평균가 (Weighted Avg)</p>
+                    <p id="modalWeightedPrice" class="text-sm font-semibold text-slate-800 mt-1">-</p>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+                <button id="modalCloseBottomBtn" class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold transition-colors">
+                    닫기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        let cryptoMap = new Map();
+        let favorites = new Set(
+            // localStorage: 브라우저에 값을 저장해두는 기능
+            // JSON.parse(): JSON 문자열을 자바스크립트 데이터로 바꿈
+            // Set: 중복된 값이 들어가지 않도록 관리하는 자료 구조
+            JSON.parse(localStorage.getItem('cryptoFavorites')) || []
+        );
+        
+        let currentTab = 'all';
+        let searchQuery = '';
+        let sortField = 'change';
+        let sortDirection = 'desc';
+        let isPolling = true;
+        let pollTimer = null;
+        let selectedCoinSymbol = null;
+
+        // 바이낸스 공식 백업 API URL (api4 엔드포인트 적용)
+        const BINANCE_API_URL = 'https://api4.binance.com/api/v3/ticker/24hr';
+
+        // DOM Elements
+        const cryptoTableBody = document.getElementById('cryptoTableBody');
+        const emptyState = document.getElementById('emptyState');
+        const emptyStateMessage = document.getElementById('emptyStateMessage');
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const tabAll = document.getElementById('tabAll');
+        const tabFavorites = document.getElementById('tabFavorites');
+        const badgeAllCount = document.getElementById('badgeAllCount');
+        const badgeFavCount = document.getElementById('badgeFavCount');
+        
+        const togglePauseBtn = document.getElementById('togglePauseBtn');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        const statTotalVol = document.getElementById('statTotalVol');
+        const statTopGainerSymbol = document.getElementById('statTopGainerSymbol');
+        const statTopGainerChange = document.getElementById('statTopGainerChange');
+        const statTopGainerPrice = document.getElementById('statTopGainerPrice');
+        const statTopLoserSymbol = document.getElementById('statTopLoserSymbol');
+        const statTopLoserChange = document.getElementById('statTopLoserChange');
+        const statTopLoserPrice = document.getElementById('statTopLoserPrice');
+        const statTotalPairs = document.getElementById('statTotalPairs');
+
+        const detailModal = document.getElementById('detailModal');
+        const modalContent = document.getElementById('modalContent');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalCloseBottomBtn = document.getElementById('modalCloseBottomBtn');
+        const modalSymbol = document.getElementById('modalSymbol');
+        const modalBaseName = document.getElementById('modalBaseName');
+        const modalPrice = document.getElementById('modalPrice');
+        const modalChangeBadge = document.getElementById('modalChangeBadge');
+        const modalLowPrice = document.getElementById('modalLowPrice');
+        const modalHighPrice = document.getElementById('modalHighPrice');
+        const modalRangeBar = document.getElementById('modalRangeBar');
+        const modalVolumeCoin = document.getElementById('modalVolumeCoin');
+        const modalVolumeUsdt = document.getElementById('modalVolumeUsdt');
+        const modalPriceChange = document.getElementById('modalPriceChange');
+        const modalWeightedPrice = document.getElementById('modalWeightedPrice');
+        const modalIcon = document.getElementById('modalIcon');
+        const modalFavBtn = document.getElementById('modalFavBtn');
+        const modalFavIcon = document.getElementById('modalFavIcon');
+
+        function formatPrice(val) {
+            const num = parseFloat(val);
+            if (isNaN(num)) return '$0.00';
+            if (num >= 1000) return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (num >= 1) return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+            if (num >= 0.0001) return '$' + num.toFixed(4);
+            return '$' + num.toFixed(8);
+        }
+
+        function formatVolume(val) {
+            const num = parseFloat(val);
+            if (isNaN(num)) return '$0';
+            if (num >= 1e9) return '$' + (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return '$' + (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return '$' + (num / 1e3).toFixed(2) + 'K';
+            return '$' + num.toFixed(2);
+        }
+
+        function formatPercent(val) {
+            const num = parseFloat(val);
+            if (isNaN(num)) return '0.00%';
+            // ? : -> num이 0보다 크면 +를, 그렇지 않으면 빈 문자열을 선택하라는 뜻
+            const prefix = num > 0 ? '+' : '';
+            return `${prefix}${num.toFixed(2)}%`;
+        }
+
+        function extractBaseSymbol(symbol) {
+            return symbol.replace('USDT', '');
+        }
+
+        // 바이낸스 API 데이터 수신 함수
+        async function fetchCryptoData() {
+            // fetch() : 서버에 HTTP 요청을 보냄
+            // async : 함수 안에서 비동기 작업을 await와 함께 사용할 수 있도록 함
+            // await : 비동기 작업이 완료될 때까지 해당 함수의 다음 작업을 기다림
+            //  -> 비동기란 시간이 오래 걸릴 수 있는 작업을 처리하는 방식
+            try {
+                const response = await fetch(BINANCE_API_URL, { cache: "no-store" });
+                if (!response.ok) throw new Error('API 네트워크 응답 에러');
+                // !response.ok = 성공하지 않았다는 의미
+                // throw new Error() = 오류 발생시킴. -> 실행 흐름이 catch 블록으로 넘어감.
+                const data = await response.json();
+                // response : HTTP 상태 코드와 응답 본문 등의 정보를 담은 응답 객체
+                // data : 응답 본문을 JSON으로 변환한 실제 데이터
+
+                if (isPolling) {
+                    statusText.textContent = '1초 주기 갱신 중';
+                    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 live-dot';
+                }
+
+                // USDT로 끝나는 순수 코인 항목만 필터링
+                const usdtPairs = data.filter(item => item.symbol.endsWith('USDT'));
+
+                usdtPairs.forEach(ticker => {
+                    const symbol = ticker.symbol;
+                    const newPrice = parseFloat(ticker.lastPrice);
+                    
+                    if (cryptoMap.has(symbol)) {
+                        const oldPrice = cryptoMap.get(symbol).lastPriceNum;
+                        if (newPrice > oldPrice) {
+                            ticker.flashClass = 'flash-up';
+                        } else if (newPrice < oldPrice) {
+                            ticker.flashClass = 'flash-down';
+                        } else {
+                            ticker.flashClass = '';
+                        }
+                    } else {
+                        ticker.flashClass = '';
+                    }
+
+                    ticker.lastPriceNum = newPrice;
+                    ticker.priceChangePercentNum = parseFloat(ticker.priceChangePercent);
+                    ticker.quoteVolumeNum = parseFloat(ticker.quoteVolume);
+                    ticker.highPriceNum = parseFloat(ticker.highPrice);
+                    ticker.lowPriceNum = parseFloat(ticker.lowPrice);
+
+                    cryptoMap.set(symbol, ticker);
+                });
+
+                updateSummaryStats();
+                renderTable();
+
+                if (selectedCoinSymbol && cryptoMap.has(selectedCoinSymbol)) {
+                    updateModalContent(cryptoMap.get(selectedCoinSymbol));
+                }
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                statusText.textContent = '연결 오류 (재시도 중)';
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
+            }
+        }
+
+        function updateSummaryStats() {
+            if (cryptoMap.size === 0) return;
+
+            // cryptoMap.values() = Map에 저장된 코인 데이터들을 가져오는 방법
+            // Array.from() = 그 데이터를 배열로 변환
+            const tickers = Array.from(cryptoMap.values());
+            
+            // reduce() = 배열의 여러 값을 하나의 결과로 합칠 때 자주 사용하는 함수
+            const totalVol = tickers.reduce((sum, item) => sum + item.quoteVolumeNum, 0);
+            statTotalVol.textContent = formatVolume(totalVol);
+
+            // sort() = 배열 정렬
+            // b.priceChangePercentNum-a.priceChangePercentNum = 변동률 높은 코인이 앞에 오도록
+            const sortedByGain = [...tickers].sort((a, b) => b.priceChangePercentNum - a.priceChangePercentNum);
+            // [0]은 첫번째 항목
+            const topGainer = sortedByGain[0];
+            // [sortedByGain.length - 1]은 마지막 항목
+            const topLoser = sortedByGain[sortedByGain.length - 1];
+
+            if (topGainer) {
+                statTopGainerSymbol.textContent = extractBaseSymbol(topGainer.symbol);
+                statTopGainerChange.textContent = formatPercent(topGainer.priceChangePercentNum);
+                statTopGainerPrice.textContent = `현재가: ${formatPrice(topGainer.lastPriceNum)}`;
+            }
+
+            if (topLoser) {
+                statTopLoserSymbol.textContent = extractBaseSymbol(topLoser.symbol);
+                statTopLoserChange.textContent = formatPercent(topLoser.priceChangePercentNum);
+                statTopLoserPrice.textContent = `현재가: ${formatPrice(topLoser.lastPriceNum)}`;
+            }
+
+            statTotalPairs.textContent = cryptoMap.size.toLocaleString();
+            badgeAllCount.textContent = cryptoMap.size;
+            badgeFavCount.textContent = favorites.size;
+        }
+
+        function getFilteredAndSortedList() {
+            // 전체 데이터를 배열로 가져오는 단계
+            let list = Array.from(cryptoMap.values());
+            // 관심 항목 탭을 선택했는지 확인
+            if (currentTab === 'favorites') {
+                list = list.filter(item => favorites.has(item.symbol));
+            }
+            // 검색어가 있는지 확인
+            if (searchQuery) {
+                // toUpperCase() = 검색어를 대문자로 바꿈 -> 사용자가 btc,Btc,BTC 중에 무엇을 입력하든 동일한 방식으로 검색 가능
+                const query = searchQuery.toUpperCase();
+                // ||는 논리 OR 연산자. 두 조건 중 하나라도 참이면 해당 코인 남김.
+                list = list.filter(item => item.symbol.includes(query) || extractBaseSymbol(item.symbol).includes(query));
+            }
+
+            list.sort((a, b) => {
+                // 선택한 정렬 항목에 따라 비교. a,b는 비교할 두 코인 데이터
+                let valA, valB;
+                // sortField가 price -> 현재가를 비교
+                switch (sortField) {
+                    case 'symbol':
+                        valA = a.symbol;
+                        valB = b.symbol;
+                        return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                    case 'price':
+                        valA = a.lastPriceNum;
+                        valB = b.lastPriceNum;
+                        break;
+                    // sortField가 change -> 변동률 비교
+                    case 'change':
+                        valA = a.priceChangePercentNum;
+                        valB = b.priceChangePercentNum;
+                        break;
+                    case 'high':
+                        valA = a.highPriceNum;
+                        valB = b.highPriceNum;
+                        break;
+                    case 'low':
+                        valA = a.lowPriceNum;
+                        valB = b.lowPriceNum;
+                        break;
+                    case 'volume':
+                        valA = a.quoteVolumeNum;
+                        valB = b.quoteVolumeNum;
+                        break;
+                    default:
+                        valA = a.priceChangePercentNum;
+                        valB = b.priceChangePercentNum;
+                }
+
+                return sortDirection === 'asc' ? valA - valB : valB - valA;
+            });
+
+            return list;
+        }
+        // 검색, 정렬, 탭 전환, API 갱신 등으로 목록이 바뀔 때 호출
+        function renderTable() {
+            // getFilteredAndSortedList() : 실제로 어떤 코인이 표시되는지 결정
+            const items = getFilteredAndSortedList();
+            // items.length === 0은 표시할 코인이 하나도 없다는 뜻
+            if (items.length === 0) {
+                cryptoTableBody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                if (currentTab === 'favorites' && favorites.size === 0) {
+                    emptyStateMessage.textContent = '즐겨찾기한 관심 암호화폐가 없습니다. 별 모양 아이콘을 눌러 추가해보세요!';
+                } else {
+                    emptyStateMessage.textContent = '검색 조건과 일치하는 암호화폐가 없습니다.';
+                }
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            // map() = 각 코인 데이터에 대해 HTML 문자열 생성
+            const rowsHtml = items.map(item => {
+                const isFav = favorites.has(item.symbol);
+                const baseSymbol = extractBaseSymbol(item.symbol);
+                const isPositive = item.priceChangePercentNum >= 0;
+                const changeBgClass = isPositive ? 'bg-emerald-50 text-cryptoUp border border-emerald-200' : 'bg-rose-50 text-cryptoDown border border-rose-200';
+                const flashClass = item.flashClass || '';
+                // `(백틱)으로 둘러싼 문자열 = 템플릿 문자열 -> ${...} 안에 변수나 계산 결과 넣을 수 있음.
+                return `
+                    <tr class="hover:bg-slate-50/80 transition-colors duration-150 group cursor-pointer ${flashClass}" onclick="openDetailModal('${item.symbol}')">
+                        <td class="py-3.5 px-4 text-center" onclick="event.stopPropagation(); toggleFavorite('${item.symbol}')">
+                            <button class="text-slate-300 hover:text-amber-400 focus:outline-none transition-colors p-1">
+                                <i class="${isFav ? 'fa-solid fa-star text-amber-400' : 'fa-regular fa-star'}"></i>
+                            </button>
+                        </td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-xs text-cyan-600 group-hover:border-cyan-400 transition-colors">
+                                    ${baseSymbol.substring(0, 3)}
+                                </div>
+                                <div>
+                                    <div class="font-bold text-slate-800 flex items-center space-x-1">
+                                        <span>${baseSymbol}</span>
+                                        <span class="text-[10px] text-slate-400 font-normal">/USDT</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-400">${item.symbol}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 text-right font-bold text-slate-900 tracking-tight">
+                            ${formatPrice(item.lastPriceNum)}
+                        </td>
+                        <td class="py-3.5 px-4 text-right">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold ${changeBgClass}">
+                                <i class="fa-solid ${isPositive ? 'fa-caret-up' : 'fa-caret-down'} mr-1"></i>
+                                ${formatPercent(item.priceChangePercentNum)}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-right text-slate-600 hidden md:table-cell">
+                            ${formatPrice(item.highPriceNum)}
+                        </td>
+                        <td class="py-3.5 px-4 text-right text-slate-600 hidden md:table-cell">
+                            ${formatPrice(item.lowPriceNum)}
+                        </td>
+                        <td class="py-3.5 px-4 text-right text-slate-600 hidden sm:table-cell font-medium">
+                            ${formatVolume(item.quoteVolumeNum)}
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            <button class="p-1.5 rounded-lg text-slate-400 hover:text-cyan-600 hover:bg-slate-100 transition-colors">
+                                <i class="fa-solid fa-chevron-right text-xs"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            // join('') = 여러 HTML 문자열을 하나로 합침
+            // innerHTML = 해당 HTML 요소 안에 HTML을 삽입
+            cryptoTableBody.innerHTML = rowsHtml;
+        }
+
+        // 같은 버튼을 눌러 즐겨찾기를 추가하거나 삭제
+        function toggleFavorite(symbol) {
+            if (favorites.has(symbol)) {
+                // 이미 즐겨찾기라면 delete()로 제거
+                favorites.delete(symbol);
+            } else {
+                // 즐겨찾기가 아니라면 add()로 추가
+                favorites.add(symbol);
+            }
+            // Array.from()으로 집합을 배열로, JSON.stringify()로 배열을 문자열로 변환
+            // localStorage.setItem()으로 브라우저에 저장
+            localStorage.setItem('cryptoFavorites', JSON.stringify(Array.from(favorites)));
+            badgeFavCount.textContent = favorites.size;
+            // renderTable()로 화면 갱신
+            renderTable();
+
+            if (selectedCoinSymbol === symbol) {
+                updateModalFavState();
+            }
+        }
+
+        // switchTab() : 현재 탭 상태 변경
+        function switchTab(tab) {
+            currentTab = tab;
+            if (tab === 'all') {
+                tabAll.className = "flex items-center space-x-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-slate-800 shadow-sm border border-slate-200/50";
+                tabFavorites.className = "flex items-center space-x-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-800 transition-all duration-200";
+            } else {
+                tabFavorites.className = "flex items-center space-x-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 bg-white text-amber-600 shadow-sm border border-slate-200/50";
+                tabAll.className = "flex items-center space-x-2 px-5 py-2.5 rounded-lg text-sm font-semibold text-slate-500 hover:text-slate-800 transition-all duration-200";
+            }
+            renderTable();
+        }
+
+        function handleSort(field) {
+            if (sortField === field) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortField = field;
+                sortDirection = 'desc';
+            }
+
+            document.querySelectorAll('.sort-icon').forEach(icon => {
+                icon.className = 'fa-solid fa-sort text-slate-400 text-[10px] sort-icon';
+            });
+
+            const activeIcon = document.getElementById(`sort-${field}`);
+            if (activeIcon) {
+                activeIcon.className = `fa-solid fa-sort-${sortDirection === 'asc' ? 'up' : 'down'} text-cyan-600 text-[10px] sort-icon`;
+            }
+
+            renderTable();
+        }
+
+        function openDetailModal(symbol) {
+            // 선택한 심볼에 해당하는 데이터를 cryptoMap에서 찾음
+            const coin = cryptoMap.get(symbol);
+            // 데이터가 없으면 함수를 종료한다
+            if (!coin) return;
+
+            // 선택한 코인 심볼 저장
+            selectedCoinSymbol = symbol;
+            // 모달 안의 가격, 변동률, 거래량 등을 업데이트
+            updateModalContent(coin);
+
+            // 숨겨진 모달을 화면에 표시
+            detailModal.classList.remove('opacity-0', 'pointer-events-none');
+            detailModal.classList.add('opacity-100');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        }
+
+        // updateModalContent() : 실제 숫자와 텍스트를 채우는 함수.
+        // 가격이 바뀌면 모달의 최저가, 최고가와 가격 범위 막대도 갱신
+        function updateModalContent(coin) {
+            const baseSymbol = extractBaseSymbol(coin.symbol);
+            modalSymbol.textContent = `${baseSymbol}/USDT`;
+            // modalBaseName = 실제 코인 이름이 아니라 coin.symbol이 들어감
+            // -> BTC 이름을 Bitcoin으로 표시하려는 의도와 달리 BTCUSDT가 표시됨
+            modalBaseName.textContent = coin.symbol;
+            modalIcon.textContent = baseSymbol.substring(0, 3);
+            modalPrice.textContent = formatPrice(coin.lastPriceNum);
+
+            const isPositive = coin.priceChangePercentNum >= 0;
+            modalChangeBadge.textContent = formatPercent(coin.priceChangePercentNum);
+            modalChangeBadge.className = `inline-block px-2.5 py-1 rounded-lg text-sm font-bold mt-1 ${isPositive ? 'bg-emerald-50 text-cryptoUp border border-emerald-200' : 'bg-rose-50 text-cryptoDown border border-rose-200'}`;
+
+            modalLowPrice.textContent = formatPrice(coin.lowPriceNum);
+            modalHighPrice.textContent = formatPrice(coin.highPriceNum);
+
+            const range = coin.highPriceNum - coin.lowPriceNum;
+            let percent = 50;
+            if (range > 0) {
+                percent = ((coin.lastPriceNum - coin.lowPriceNum) / range) * 100;
+                percent = Math.max(0, Math.min(100, percent));
+            }
+            modalRangeBar.style.width = `${percent}%`;
+
+            modalVolumeCoin.textContent = `${parseFloat(coin.volume).toLocaleString(undefined, {maximumFractionDigits: 2})} ${baseSymbol}`;
+            modalVolumeUsdt.textContent = formatVolume(coin.quoteVolumeNum);
+            
+            const priceChangeVal = parseFloat(coin.priceChange);
+            modalPriceChange.textContent = `${priceChangeVal >= 0 ? '+' : ''}${priceChangeVal.toFixed(4)} USDT`;
+            modalWeightedPrice.textContent = formatPrice(parseFloat(coin.weightedAvgPrice));
+
+            updateModalFavState();
+        }
+
+        function updateModalFavState() {
+            if (favorites.has(selectedCoinSymbol)) {
+                modalFavIcon.className = 'fa-solid fa-star text-amber-400';
+            } else {
+                modalFavIcon.className = 'fa-regular fa-star text-slate-300';
+            }
+        }
+
+        // 닫기 버튼을 누르면 모달을 숨기고 선택된 코인 정보를 초기화
+        // 오른쪽 위 X 버튼, 하단의 닫기 버튼, 모달 바깥쪽 영역 클릭, 키보드의 Escape 키
+        function closeModal() {
+            detailModal.classList.add('opacity-0', 'pointer-events-none');
+            detailModal.classList.remove('opacity-100');
+            modalContent.classList.add('scale-95');
+            modalContent.classList.remove('scale-100');
+            selectedCoinSymbol = null;
+        }
+
+        function togglePolling() {
+            // isPolling이 true이면 false, false이면 true가 됨
+            isPolling = !isPolling;
+            if (isPolling) {
+                pauseIcon.className = 'fa-solid fa-pause text-sm';
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 live-dot';
+                statusText.textContent = '1초 주기 갱신 중';
+                startPolling();
+            } else {
+                pauseIcon.className = 'fa-solid fa-play text-sm';
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
+                statusText.textContent = '일시정지됨';
+                clearInterval(pollTimer);
+            }
+        }
+
+        // 일시정지 상태에서는 반복 타이머를 중단하고, 재개하면 startPolling() 호출
+        // 데이터를 반복해서 가져오는 기능을 정의
+        function startPolling() {
+            // 이전에 실행 중이던 반복 작업이 있다면 중단
+            clearInterval(pollTimer);
+            // 기다리지 않고 우선 데이터를 한 번 가져옴
+            fetchCryptoData();
+            // 1000ms = 1s : 1초마다 함수 실행
+            pollTimer = setInterval(fetchCryptoData, 1000);
+        }
+
+        // 사용자의 행동과 프로그램의 기능을 연결하는 역할
+        // DOMContentLoaded는 브라우저가 HTML 문서를 읽고 DOM 구성을 마쳤을 때 발생하는 이벤트
+        //-> 버튼과 입력창 같은 HTML 요소가 준비된 뒤 JavaScript가 동작하도록 만드는 것
+        document.addEventListener('DOMContentLoaded', () => {
+            // 페이지가 준비되면 자동으로 시세 데이터를 가져오기 시작
+            startPolling();
+
+            const themeToggle = document.getElementById('themeToggle');
+
+            // 저장된 테마 불러오기
+            const savedTheme = localStorage.getItem('theme');
+
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.textContent = '☀️ 라이트 모드';
+            }  
+
+            // 버튼 클릭 시 테마 전환
+            themeToggle.addEventListener('click', () => {
+                const isDark = document.body.classList.toggle('dark-mode');
+
+                if (isDark) {
+                    themeToggle.textContent = '☀️ 라이트 모드';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    themeToggle.textContent = '🌙 다크 모드';
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+
+            // addEventListener() : 특정 이벤트가 발생했을 때 실행할 동작을 등록
+            // input: 입력창의 내용이 변경될때 발생하는 이벤트
+            // e : 이벤트 정보를 전달받는 매개변수 , e.target.value : 입력창에 현재 들어있는 값
+            searchInput.addEventListener('input', (e) => {
+                // trim() : 문자열 앞뒤의 공백 제거
+                searchQuery = e.target.value.trim();
+                if (searchQuery.length > 0) {
+                    clearSearchBtn.classList.remove('hidden');
+                } else {
+                    clearSearchBtn.classList.add('hidden');
+                }
+                // 검색 결과에 맞게 표를 다시 표시
+                renderTable();
+            });
+
+            clearSearchBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                searchQuery = '';
+                clearSearchBtn.classList.add('hidden');
+                renderTable();
+            });
+
+            tabAll.addEventListener('click', () => switchTab('all'));
+            tabFavorites.addEventListener('click', () => switchTab('favorites'));
+
+            document.querySelectorAll('th[data-sort]').forEach(th => {
+                th.addEventListener('click', () => {
+                    const field = th.getAttribute('data-sort');
+                    handleSort(field);
+                });
+            });
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modalCloseBottomBtn.addEventListener('click', closeModal);
+            detailModal.addEventListener('click', (e) => {
+                if (e.target === detailModal) closeModal();
+            });
+            modalFavBtn.addEventListener('click', () => {
+                if (selectedCoinSymbol) {
+                    toggleFavorite(selectedCoinSymbol);
+                }
+            });
+
+            togglePauseBtn.addEventListener('click', togglePolling);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
+            });
+        });
+    </script>
+</body>
+</html>
